@@ -1,0 +1,63 @@
+{
+  "name": "floatodo",
+  "version": "1.0.0",
+  "description": "Lightweight desktop todo overlay",
+  "main": "main.js",
+  "scripts": {
+    "start":       "\"C:\\ws\\developer\\floatodo\\electron-v42.5.0-win32-x64\\electron.exe\" .",
+    "build:mac":   "npx electron-builder --mac --dir",
+    "build:win":   "npx electron-builder --win --dir",
+    "build:linux": "npx electron-builder --linux --dir",
+    "release:win": "npx electron-builder --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "build": {
+    "appId": "com.floatodo.app",
+    "productName": "FloaTodo",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "YOUR_GITHUB_USERNAME",
+      "repo": "floatodo",
+      "releaseType": "release"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis",
+      "artifactName": "FloaTodo-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "license": "assets/install-guide.rtf",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "FloaTodo",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "installerHeaderIcon": "assets/icon.ico",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.5.0",
+    "electron-builder": "^26.8.2"
+  }
+}

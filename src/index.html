@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FloaTodo</title>
+  <!-- Apply saved theme before render to avoid flash -->
+  <script>
+    (function(){
+      const t = localStorage.getItem('floatodo-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── DARK THEME (default) ─────────────────────────── */
+    :root, [data-theme="dark"] {
+      --font: 'DM Sans', 'Segoe UI Variable', system-ui, -apple-system, sans-serif;
+      --base: #252525;
+      --surf: #2b2b2b;
+      --nr:   6px 6px 14px rgba(255,255,255,0.085), -5px -5px 10px rgba(0,0,0,0.48);
+      --nr-s: 4px 4px 9px rgba(255,255,255,0.075),  -3px -3px 7px rgba(0,0,0,0.42);
+      --ni:   inset 5px 5px 11px rgba(0,0,0,0.50),  inset -3px -3px 7px rgba(255,255,255,0.06);
+      --ni-s: inset 3px 3px 7px rgba(0,0,0,0.44),   inset -2px -2px 5px rgba(255,255,255,0.055);
+      --foc:  0 0 0 2px rgba(90,158,240,0.65);
+      --t:    rgba(255,255,255,0.87);
+      --td:   rgba(255,255,255,0.44);
+      --tdd:  rgba(255,255,255,0.24);
+      --tdone:rgba(255,255,255,0.30);
+      --ac:   #5a9ef0;
+      --ac-glow:   rgba(90,158,240,0.38);
+      --ac-glow-h: rgba(90,158,240,0.52);
+      --panel-border: rgba(255,255,255,0.055);
+      --panel-shadow: -4px 0 28px rgba(0,0,0,0.50);
+      --divider: rgba(255,255,255,0.045);
+      --r:  14px; --rs: 10px; --rx: 7px;
+    }
+
+    /* ── LIGHT THEME ──────────────────────────────────── */
+    [data-theme="light"] {
+      --base: #f0f0f0;
+      --surf: #f0f0f0;
+      --nr:   5px 5px 12px rgba(0,0,0,0.13), -4px -4px 10px rgba(255,255,255,0.92);
+      --nr-s: 3px 3px 8px rgba(0,0,0,0.11),  -3px -3px 7px rgba(255,255,255,0.88);
+      --ni:   inset 5px 5px 10px rgba(0,0,0,0.11), inset -3px -3px 7px rgba(255,255,255,0.92);
+      --ni-s: inset 3px 3px 6px rgba(0,0,0,0.09),  inset -2px -2px 5px rgba(255,255,255,0.88);
+      --foc:  0 0 0 2px rgba(37,99,235,0.52);
+      --t:    rgba(18,18,30,0.88);
+      --td:   rgba(18,18,30,0.50);
+      --tdd:  rgba(18,18,30,0.34);
+      --tdone:rgba(18,18,30,0.50);
+      --ac:   #2563eb;
+      --ac-glow:   rgba(37,99,235,0.32);
+      --ac-glow-h: rgba(37,99,235,0.48);
+      --panel-border: rgba(0,0,0,0.10);
+      --panel-shadow: -4px 0 28px rgba(0,0,0,0.18);
+      --divider: rgba(0,0,0,0.08);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: transparent; overflow: hidden;
+      -webkit-app-region: no-drag;
+      font-family: var(--font); color: var(--t);
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      font-feature-settings: 'cv02','cv03','cv04','cv11';
+    }
+
+    #panel {
+      position: fixed; inset: 0;
+      background: var(--base);
+      border-left: 1px solid var(--panel-border);
+      box-shadow: var(--panel-shadow);
+      transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+
+    #app {
+      position: relative; z-index: 1;
+      width: 100%; height: 100vh;
+      overflow-y: auto; overflow-x: hidden;
+      padding: 18px 14px 80px;
+      scrollbar-width: none;
+      display: flex; flex-direction: column;
+    }
+    #app::-webkit-scrollbar { display: none; }
+
+    /* ── HEADER ──────────────────────────────────────── */
+    .header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 4px 2px 24px;
+      -webkit-app-region: drag;
+    }
+    .header-meta { display: flex; flex-direction: column; gap: 3px; }
+    .header-day   { font-size: 20px; font-weight: 600; color: var(--t); letter-spacing: -0.5px; line-height: 1; }
+    .header-date  { font-size: 10.5px; color: var(--td); margin-top: 2px; }
+    .header-count { font-size: 10.5px; color: var(--tdd); }
+
+    .header-btns {
+      display: flex; gap: 7px; align-items: center;
+      -webkit-app-region: no-drag;
+    }
+
+    /* Shared icon button style */
+    .btn-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surf); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--td); font-size: 15px; line-height: 1;
+      box-shadow: var(--nr-s);
+      transition: box-shadow 0.15s, color 0.15s, background 0.25s;
+    }
+    .btn-icon:hover { color: var(--t); }
+    .btn-icon:focus-visible { outline: none; box-shadow: var(--nr-s), var(--foc); }
+    .btn-icon:active { box-shadow: var(--ni-s); }
+
+    /* ── INPUT ───────────────────────────────────────── */
+    .input-wrap {
+      display: flex; gap: 8px; margin-bottom: 6px; position: relative;
+    }
+    .input-wrap::before {
+      content: 'New task';
+      position: absolute; top: -19px; left: 2px;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--ac); opacity: 0; transform: translateY(4px);
+      transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+    }
+    .input-wrap.focused::before { opacity: 0.75; transform: translateY(0); }
+
+    /* The input is a textarea so it can expand */
+    .input-wrap textarea {
+      flex: 1; background: var(--surf); border: none;
+      border-radius: var(--rs); color: var(--t);
+      font-family: var(--font); font-size: 12px;
+      padding: 9px 12px; outline: none;
+      box-shadow: var(--ni);
+      resize: none; overflow: hidden;
+      height: 36px; line-height: 18px;
+      transition: box-shadow 0.2s, background 0.25s, height 0.22s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    .input-wrap textarea::placeholder { color: var(--tdd); }
+    .input-wrap textarea:focus { box-shadow: var(--ni), var(--foc); }
+    .input-wrap textarea.expanded {
+      height: auto; min-height: 80px; max-height: 180px;
+      overflow-y: auto; line-height: 1.6;
+    }
+
+    /* Hint shown below the input when expanded */
+    .input-expand-hint {
+      font-size: 9px; color: var(--tdd); text-align: right;
+      margin-bottom: 10px; padding-right: 2px;
+      display: none;
+    }
+    .input-expand-hint.visible { display: block; }
+
+    .btn-add {
+      width: 34px; height: 34px; border-radius: var(--rs);
+      background: var(--ac); border: none; color: rgba(0,0,0,0.82);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 5px 5px 12px var(--ac-glow), -3px -3px 7px rgba(255,255,255,0.07);
+      transition: box-shadow 0.15s, transform 0.15s, background 0.25s;
+    }
+    .btn-add:hover { box-shadow: 6px 6px 16px var(--ac-glow-h), -3px -3px 7px rgba(255,255,255,0.08); }
+    .btn-add:focus-visible { outline: none; box-shadow: 5px 5px 12px var(--ac-glow), var(--foc); }
+    .btn-add:active { transform: scale(0.96); box-shadow: var(--ni-s); }
+
+    .shortcut-hint {
+      font-size: 10px; color: var(--tdd); text-align: center; margin-bottom: 22px;
+      letter-spacing: 0.1px;
+    }
+    .shortcut-hint kbd {
+      font-family: var(--font);
+      font-size: 10px; font-weight: 500;
+      color: var(--td);
+      /* no border, no background — just distinguished text */
+    }
+
+    /* ── DATE GROUPS ─────────────────────────────────── */
+    .date-group { margin-bottom: 16px; }
+    .date-group-label {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.9px;
+      text-transform: uppercase; color: var(--td); padding: 0 2px 8px;
+    }
+    .date-group-label.is-today { color: var(--ac); }
+    .todo-list { display: flex; flex-direction: column; gap: 9px; }
+
+    /* ── CARD ────────────────────────────────────────── */
+    .card {
+      position: relative;
+      background: var(--surf); border-radius: var(--r); border: none;
+      box-shadow: var(--nr);
+      padding: 10px 10px 10px 10px;
+      display: flex; align-items: flex-start; gap: 9px;
+      transition: box-shadow 0.18s, opacity 0.18s, transform 0.18s, background 0.25s;
+      animation: card-in 0.25s cubic-bezier(0.34,1.46,0.64,1) both;
+      cursor: default; outline: none;
+    }
+
+    /* ── SPOTLIGHT: dim everything except the focused card ── */
+    #app.kb-nav .card:not(:focus-visible) { opacity: 0.18; }
+    #app.kb-nav .card:focus-visible        { opacity: 1; z-index: 4; }
+
+    .card:hover:not(:focus-visible) { transform: translateX(-4px); }
+    .card:focus-visible {
+      box-shadow: var(--nr),
+        0 0 0 2px rgba(90,158,240,0.70),
+        0 0 20px rgba(90,158,240,0.22);
+      transform: translateX(-10px) scale(1.013);
+      z-index: 4;
+    }
+    [data-theme="light"] .card:focus-visible {
+      box-shadow: var(--nr),
+        0 0 0 2px rgba(37,99,235,0.55),
+        0 0 18px rgba(37,99,235,0.16);
+    }
+    .card:focus-visible .card-actions { opacity: 1; }
+    .card.done { box-shadow: var(--ni); opacity: 0.48; }
+    .card.done .todo-text { color: var(--tdone); }
+
+    @keyframes card-in {
+      from { opacity: 0; transform: translateX(14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── CARD NUMBER ─────────────────────────────────── */
+    .card-num {
+      font-size: 8px; font-weight: 700; letter-spacing: 0.2px;
+      color: var(--tdd); flex-shrink: 0;
+      width: 11px; text-align: right;
+      opacity: 0.35; align-self: flex-start; margin-top: 2px;
+      transition: color 0.15s, opacity 0.15s;
+      position: relative; z-index: 2;
+    }
+    .card:focus-visible .card-num { color: var(--ac); opacity: 1; }
+
+    /* ── CHECKBOX ────────────────────────────────────── */
+    .check {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--surf); box-shadow: var(--ni-s); border: none;
+      flex-shrink: 0; cursor: pointer; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: box-shadow 0.15s, background 0.15s;
+      position: relative; z-index: 2;
+    }
+    .check:hover { box-shadow: var(--ni-s), 0 0 0 1px rgba(128,128,128,0.20); }
+    .check:focus-visible { outline: none; box-shadow: var(--ni-s), var(--foc); }
+    .card.done .check { background: rgba(34,197,120,0.22); box-shadow: var(--ni-s); }
+    .check svg { opacity: 0; transition: opacity 0.18s; }
+    .card.done .check svg { opacity: 1; }
+
+    /* ── CARD BODY ───────────────────────────────────── */
+    .todo-body { flex: 1; min-width: 0; cursor: pointer; position: relative; z-index: 2; }
+    .todo-text {
+      font-size: 11.5px; font-weight: 400; line-height: 1.45;
+      color: var(--t);
+      word-break: break-word; white-space: pre-wrap;
+      transition: color 0.2s;
+    }
+    .todo-meta {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 9.5px; color: var(--tdd); margin-top: 3px;
+      letter-spacing: 0.1px;
+    }
+    .sub-progress { font-size: 9px; }
+
+    /* Inline shortcut hint — appears on the focused card */
+    .card-hint {
+      font-size: 9px; color: var(--tdd);
+      margin-top: 7px; opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      line-height: 1; letter-spacing: 0.1px;
+    }
+    .card:focus-visible .card-hint { opacity: 0.70; }
+
+    /* ── CARD ACTIONS ────────────────────────────────── */
+    .card-actions {
+      display: flex; flex-direction: row; gap: 4px;
+      /* Always faintly visible so users know cards are openable */
+      opacity: 0.28;
+      transition: opacity 0.15s; flex-shrink: 0; z-index: 2;
+    }
+    .card:hover .card-actions,
+    .card:focus-visible .card-actions { opacity: 1; }
+    .act-btn {
+      width: 22px; height: 22px; border-radius: var(--rx);
+      background: var(--surf); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--td); box-shadow: var(--nr-s);
+      transition: box-shadow 0.15s, color 0.15s, background 0.25s;
+    }
+    .act-btn:hover  { color: var(--t); }
+    .act-btn:focus-visible { outline: none; box-shadow: var(--nr-s), var(--foc); }
+    .act-btn:active { box-shadow: var(--ni-s); }
+    .act-btn.expand:hover { color: var(--ac); }
+    .act-btn.del:hover    { color: #e55; }
+
+
+    /* ── UPDATE BANNER ───────────────────────────────── */
+    .update-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 8px 12px; margin-bottom: 12px;
+      background: var(--surf); border-radius: var(--rs);
+      box-shadow: var(--nr-s);
+      font-size: 10.5px; color: var(--td);
+      animation: fade-in 0.3s ease both;
+    }
+    .update-banner.hidden { display: none; }
+    .update-banner .update-msg { flex: 1; }
+    .update-banner .update-msg strong { color: var(--t); }
+    .btn-update {
+      background: var(--ac); border: none; border-radius: var(--rx);
+      color: rgba(0,0,0,0.82); font-family: var(--font); font-size: 10px;
+      font-weight: 600; padding: 4px 10px; cursor: pointer; white-space: nowrap;
+      box-shadow: 3px 3px 8px var(--ac-glow);
+      transition: box-shadow 0.15s;
+    }
+    .btn-update:hover { box-shadow: 4px 4px 12px var(--ac-glow-h); }
+    .btn-update-check {
+      background: none; border: none; color: var(--tdd); font-family: var(--font);
+      font-size: 10px; cursor: pointer; padding: 2px 4px; text-decoration: underline;
+      transition: color 0.15s;
+    }
+    .btn-update-check:hover { color: var(--td); }
+
+    /* ── EMPTY ───────────────────────────────────────── */
+    .empty {
+      text-align: center; padding: 36px 0 0;
+      color: var(--tdd); font-size: 12px; line-height: 1.9;
+      animation: fade-in 0.4s ease both;
+    }
+    .empty-icon { font-size: 22px; margin-bottom: 10px; opacity: 0.28; }
+
+    /* ── DETAIL OVERLAY ──────────────────────────────── */
+    #detail-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--base);
+      border-left: 1px solid var(--panel-border);
+      opacity: 1; visibility: visible;
+      transition: opacity 0.22s, visibility 0.22s, background 0.25s;
+    }
+    #detail-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    #detail-panel {
+      position: absolute; inset: 0;
+      overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+      padding: 16px 15px 44px;
+      display: flex; flex-direction: column;
+    }
+    #detail-panel::-webkit-scrollbar { display: none; }
+    #detail-panel textarea, #detail-panel input {
+      user-select: text; -webkit-user-select: text;
+    }
+    @keyframes detail-in {
+      from { opacity: 0; transform: translateX(14px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    #detail-panel.animating { animation: detail-in 0.22s cubic-bezier(0.34,1.2,0.64,1) both; }
+
+    /* Detail header */
+    .detail-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 16px; -webkit-app-region: drag;
+    }
+    .btn-close-detail {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surf); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--td); font-size: 14px;
+      box-shadow: var(--nr-s); transition: box-shadow 0.15s, color 0.15s, background 0.25s;
+      -webkit-app-region: no-drag;
+    }
+    .btn-close-detail:hover { color: var(--t); }
+    .btn-close-detail:focus-visible { outline: none; box-shadow: var(--nr-s), var(--foc); }
+    .btn-close-detail:active { box-shadow: var(--ni-s); }
+
+    .detail-done-toggle {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--surf); border: none; border-radius: 20px;
+      color: var(--td); font-family: var(--font); font-size: 10px; font-weight: 500;
+      padding: 5px 11px; cursor: pointer;
+      box-shadow: var(--nr-s); transition: box-shadow 0.15s, color 0.15s, background 0.25s;
+      -webkit-app-region: no-drag;
+    }
+    .detail-done-toggle:hover { color: var(--t); }
+    .detail-done-toggle:focus-visible { outline: none; box-shadow: var(--nr-s), var(--foc); }
+    .detail-done-toggle:active { box-shadow: var(--ni-s); }
+    .detail-done-toggle.is-done { color: rgba(22,197,110,0.90); box-shadow: var(--ni-s); }
+
+    /* Content textarea */
+    .detail-content {
+      width: 100%; background: var(--surf); border: none;
+      border-radius: var(--rs); color: var(--t);
+      font-family: var(--font); font-size: 12.5px; line-height: 1.65;
+      padding: 12px 13px; resize: none; outline: none;
+      min-height: 100px; box-shadow: var(--ni);
+      transition: box-shadow 0.2s, background 0.25s;
+      margin-bottom: 8px;
+    }
+    .detail-content:focus { box-shadow: var(--ni), var(--foc); }
+    .detail-content::placeholder { color: var(--tdd); font-style: italic; }
+    .detail-content.done-content { opacity: 0.55; /* no strikethrough */ }
+
+    .detail-meta {
+      font-size: 9.5px; color: var(--tdd); margin-bottom: 16px; padding: 0 2px;
+      letter-spacing: 0.1px;
+    }
+
+    /* Checklist — hidden when empty */
+    .checklist-section { display: none; }
+    .checklist-section.has-items { display: block; }
+    .d-section {
+      font-size: 9px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--tdd); margin: 0 0 8px;
+    }
+    .subtask-list { display: flex; flex-direction: column; gap: 6px; }
+    .subtask-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 11px; background: var(--surf); border: none;
+      border-radius: var(--rx); box-shadow: var(--nr-s);
+      transition: box-shadow 0.15s, opacity 0.15s, background 0.25s; outline: none;
+    }
+    .subtask-row:focus-visible { box-shadow: var(--nr-s), var(--foc); }
+    .subtask-row.s-done { box-shadow: var(--ni-s); opacity: 0.55; }
+    .s-check {
+      width: 15px; height: 15px; border-radius: 50%;
+      background: var(--surf); box-shadow: var(--ni-s); border: none;
+      flex-shrink: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: box-shadow 0.15s, background 0.15s;
+    }
+    .s-check:hover { box-shadow: var(--ni-s), 0 0 0 1px rgba(128,128,128,0.20); }
+    .s-check:focus-visible { outline: none; box-shadow: var(--ni-s), var(--foc); }
+    .subtask-row.s-done .s-check { background: rgba(34,197,120,0.22); }
+    .s-check svg { opacity: 0; transition: opacity 0.15s; }
+    .subtask-row.s-done .s-check svg { opacity: 1; }
+    .s-text { flex: 1; font-size: 12px; color: var(--t); user-select: text; }
+    .subtask-row.s-done .s-text { color: var(--tdone); /* no strikethrough */ }
+    .s-del {
+      width: 18px; height: 18px; border-radius: 5px;
+      background: none; border: none; color: rgba(128,128,128,0.40);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s; opacity: 0;
+    }
+    .subtask-row:hover .s-del,
+    .subtask-row:focus-visible .s-del { opacity: 1; }
+    .s-del:hover { color: #e55; }
+
+    .detail-footer {
+      margin-top: 28px; padding-top: 16px;
+      border-top: 1px solid var(--divider);
+    }
+    .btn-delete-task {
+      width: 100%; background: var(--surf); border: none;
+      border-radius: var(--rs); color: rgba(200,60,60,0.70);
+      font-family: var(--font); font-size: 11px; font-weight: 500;
+      padding: 9px; cursor: pointer;
+      box-shadow: var(--nr-s); transition: box-shadow 0.15s, color 0.15s, background 0.25s;
+    }
+    .btn-delete-task:hover { color: #e55; }
+    .btn-delete-task:focus-visible { outline: none; box-shadow: var(--nr-s), var(--foc); }
+    .btn-delete-task:active { box-shadow: var(--ni-s); }
+
+    .autosave-toast {
+      position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+      font-size: 10px; font-weight: 500; color: rgba(22,197,110,0.90);
+      background: var(--surf); border: none; border-radius: 20px;
+      padding: 4px 14px; z-index: 300; box-shadow: var(--nr-s);
+      opacity: 0; transition: opacity 0.3s, background 0.25s; pointer-events: none;
+    }
+    .autosave-toast.show { opacity: 1; }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+<div id="panel"></div>
+
+<div id="app">
+  <div class="header">
+    <div class="header-meta">
+      <div class="header-day"   id="header-day"></div>
+      <div class="header-date"  id="header-date"></div>
+      <div class="header-count" id="sub-count">—</div>
+    </div>
+    <div class="header-btns">
+      <!-- Theme toggle: shows sun in dark mode, moon in light mode -->
+      <button class="btn-icon" id="btn-theme" title="Toggle theme (Alt+T)">
+        <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4.5"/>
+          <line x1="12" y1="2"    x2="12" y2="4.5"/>
+          <line x1="12" y1="19.5" x2="12" y2="22"/>
+          <line x1="4.22" y1="4.22" x2="5.92" y2="5.92"/>
+          <line x1="18.08" y1="18.08" x2="19.78" y2="19.78"/>
+          <line x1="2"    y1="12" x2="4.5"  y2="12"/>
+          <line x1="19.5" y1="12" x2="22"   y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.92" y2="18.08"/>
+          <line x1="18.08" y1="5.92" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="icon-moon" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="btn-icon" title="Hide (Ctrl+Shift+Space)" onclick="window.api.hideWindow()">×</button>
+    </div>
+  </div>
+
+  <!-- Update banner (hidden until update available/downloaded) -->
+  <div class="update-banner hidden" id="update-banner">
+    <span class="update-msg" id="update-msg">Update available</span>
+    <button class="btn-update hidden" id="btn-install-update">Restart &amp; Update</button>
+    <button class="btn-update-check hidden" id="btn-check-update">Check for updates</button>
+  </div>
+
+  <div class="input-wrap" id="input-wrap">
+    <textarea id="new-input" rows="1"
+              placeholder="What needs to get done…" maxlength="500"></textarea>
+    <button class="btn-add" id="btn-add" title="Add (Enter)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="input-expand-hint" id="input-expand-hint">
+    ⏎ save &nbsp;·&nbsp; Shift+⏎ new line &nbsp;·&nbsp; Esc collapse
+  </div>
+  <div class="shortcut-hint"><kbd>Enter</kbd> add · <kbd>Shift+Enter</kbd> expand · <kbd>↑↓</kbd> navigate · <kbd>Alt+T</kbd> theme</div>
+
+  <div id="task-groups"></div>
+
+  <div class="empty" id="empty-state">
+    <div class="empty-icon">✦</div>
+    Nothing yet.<br>Type a task and press Enter.
+  </div>
+</div>
+
+
+<!-- Detail overlay -->
+<div id="detail-overlay" class="hidden">
+  <div id="detail-panel">
+    <div class="detail-header">
+      <button class="btn-close-detail" id="btn-close-detail" title="Close (Esc)">×</button>
+      <button class="detail-done-toggle" id="detail-done-toggle">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4l3 3 5-6" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="detail-done-label">Done</span>
+      </button>
+    </div>
+
+    <textarea id="detail-content" class="detail-content"
+              placeholder="Task title…&#10;&#10;Add notes, steps, or anything else…"></textarea>
+
+    <div class="detail-meta" id="detail-meta">—</div>
+
+    <div class="checklist-section" id="checklist-section">
+      <div class="d-section">Checklist</div>
+      <div class="subtask-list" id="subtask-list"></div>
+    </div>
+
+    <div class="detail-footer">
+      <button class="btn-delete-task" id="detail-delete-btn">Delete task</button>
+    </div>
+  </div>
+</div>
+
+<div class="autosave-toast" id="autosave-toast">Saved</div>
+
+<script>
+  let todos         = [];
+  let activeId      = null;
+  let autoSaveT     = null;
+  let focusedCardId = null;
+
+  // ── Auto-updater UI ───────────────────────────────────────────────────────
+  const updateBanner      = document.getElementById('update-banner');
+  const updateMsg         = document.getElementById('update-msg');
+  const btnInstallUpdate  = document.getElementById('btn-install-update');
+  const btnCheckUpdate    = document.getElementById('btn-check-update');
+
+  function showBanner(msg, showInstall) {
+    updateMsg.innerHTML = msg;
+    updateBanner.classList.remove('hidden');
+    btnInstallUpdate.classList.toggle('hidden', !showInstall);
+    btnCheckUpdate.classList.toggle('hidden', showInstall);
+  }
+
+  window.api.onUpdateAvailable(info => {
+    showBanner(`<strong>Update ${info.version}</strong> is downloading…`, false);
+  });
+
+  window.api.onUpdateDownloaded(info => {
+    showBanner(`<strong>Update ${info.version}</strong> ready to install`, true);
+  });
+
+  btnInstallUpdate.addEventListener('click', () => window.api.installUpdate());
+  btnCheckUpdate.addEventListener('click', async () => {
+    updateMsg.innerHTML = 'Checking for updates…';
+    try { await window.api.checkForUpdate(); }
+    catch { updateMsg.innerHTML = 'Could not check for updates'; }
+  });
+
+  // ── Theme ─────────────────────────────────────────────────────────────────
+  let currentTheme = localStorage.getItem('floatodo-theme') || 'dark';
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('floatodo-theme', theme);
+    document.getElementById('icon-sun').style.display  = theme === 'dark'  ? '' : 'none';
+    document.getElementById('icon-moon').style.display = theme === 'light' ? '' : 'none';
+    document.getElementById('btn-theme').title = theme === 'dark'
+      ? 'Switch to light (Alt+T)' : 'Switch to dark (Alt+T)';
+  }
+
+  function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+
+  // Apply on load (also handled by inline script in <head>, this syncs the icons)
+  applyTheme(currentTheme);
+
+  document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  function refreshHeader() {
+    const d = new Date();
+    document.getElementById('header-day').textContent =
+      d.toLocaleDateString('en-US', { weekday: 'long' });
+    document.getElementById('header-date').textContent =
+      d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  refreshHeader();
+  setInterval(refreshHeader, 60000);
+
+  // ── Input focus & expand ──────────────────────────────────────────────────
+  const inp  = document.getElementById('new-input');
+  const wrap = document.getElementById('input-wrap');
+  const expandHint = document.getElementById('input-expand-hint');
+  let inputExpanded = false;
+
+  inp.addEventListener('focus', () => wrap.classList.add('focused'));
+  inp.addEventListener('blur',  () => {
+    // Only collapse/un-focus if nothing else is being interacted with
+    wrap.classList.remove('focused');
+  });
+
+  window.api.onFocusInput(() => {
+    if (activeId) closeDetail(true);
+    setTimeout(() => { inp.focus(); inp.select(); collapseInput(); setKbNav(false); }, 30);
+  });
+
+  function expandInput() {
+    if (inputExpanded) return;
+    inputExpanded = true;
+    inp.classList.add('expanded');
+    autoResize(inp);
+    expandHint.classList.add('visible');
+  }
+
+  function collapseInput() {
+    if (!inputExpanded) return;
+    inputExpanded = false;
+    inp.classList.remove('expanded');
+    inp.style.height = '';
+    expandHint.classList.remove('visible');
+  }
+
+  // ── Spotlight / KB-nav mode ───────────────────────────────────────────────
+  const appEl = document.getElementById('app');
+  let kbNavT  = null;
+
+  function setKbNav(active) {
+    clearTimeout(kbNavT);
+    if (active) {
+      appEl.classList.add('kb-nav');
+    } else {
+      kbNavT = setTimeout(() => {
+        if (!document.activeElement?.closest('.card[tabindex]'))
+          appEl.classList.remove('kb-nav');
+      }, 80);
+    }
+  }
+
+  // ── Date helpers ──────────────────────────────────────────────────────────
+  function dateBucket(iso) { return new Date(iso).toDateString(); }
+
+  function dateLabel(dateStr) {
+    const today     = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (dateStr === today)     return { text: 'Today',     isToday: true };
+    if (dateStr === yesterday) return { text: 'Yesterday', isToday: false };
+    const d = new Date(dateStr);
+    const diffDays = Math.floor((Date.now() - d) / 86400000);
+    if (diffDays < 7) return { text: d.toLocaleDateString('en-US', { weekday: 'long' }), isToday: false };
+    return { text: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), isToday: false };
+  }
+
+  function relTime(iso) {
+    const d = Date.now() - new Date(iso);
+    if (d < 60000)     return 'just now';
+    if (d < 3600000)   return Math.floor(d/60000)   + 'm ago';
+    if (d < 86400000)  return Math.floor(d/3600000)  + 'h ago';
+    if (d < 604800000) return Math.floor(d/86400000) + 'd ago';
+    return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  }
+
+  function fullDate(iso) {
+    return new Date(iso).toLocaleString('en-US', {
+      month:'long', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'
+    });
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  let _cardN = 0; // resets each render pass
+
+  function render() {
+    _cardN = 0;
+    const active = todos.filter(t => !t.done).length;
+    document.getElementById('empty-state').style.display = todos.length === 0 ? '' : 'none';
+    document.getElementById('sub-count').textContent =
+      todos.length === 0 ? '' :
+      active       === 0 ? 'All done ✓' :
+                           `${active} remaining`;
+
+    const buckets = new Map();
+    todos.forEach(t => {
+      const key = dateBucket(t.createdAt);
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(t);
+    });
+
+    const container = document.getElementById('task-groups');
+    container.innerHTML = '';
+
+    buckets.forEach((items, dateStr) => {
+      const { text, isToday } = dateLabel(dateStr);
+      const group = document.createElement('div');
+      group.className = 'date-group';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'date-group-label' + (isToday ? ' is-today' : '');
+      lbl.textContent = text;
+      group.appendChild(lbl);
+
+      const list = document.createElement('div');
+      list.className = 'todo-list';
+      items.forEach(t => list.appendChild(buildCard(t)));
+      group.appendChild(list);
+      container.appendChild(group);
+
+      if (focusedCardId) {
+        const card = list.querySelector(`[data-id="${focusedCardId}"]`);
+        if (card) requestAnimationFrame(() => card.focus({ preventScroll: false }));
+      }
+    });
+  }
+
+  function buildCard(todo) {
+    const num  = ++_cardN;
+    const card = document.createElement('div');
+    card.className = `card${todo.done ? ' done' : ''}`;
+    card.dataset.id  = todo.id;
+    card.dataset.num = num;
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'article');
+    card.setAttribute('aria-label', `Task: ${todo.text}${todo.done ? ', completed' : ''}`);
+
+    const subs    = todo.subtasks || [];
+    const subDone = subs.filter(s => s.done).length;
+    const subProg = subs.length > 0
+      ? `<span style="opacity:.4">·</span><span class="sub-progress">${subDone}/${subs.length}</span>` : '';
+
+    card.innerHTML = `
+      <span class="card-num">${num}</span>
+      <div class="check" tabindex="0" data-action="check"
+           role="checkbox" aria-checked="${todo.done}">
+        <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.6"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="todo-body" data-action="expand">
+        <div class="todo-text">${escHtml(todo.text)}</div>
+        <div class="todo-meta">
+          <span>${relTime(todo.createdAt)}</span>${subProg}
+        </div>
+        <div class="card-hint">⏎ open &nbsp;·&nbsp; spc done &nbsp;·&nbsp; Del delete &nbsp;·&nbsp; 1–9 jump</div>
+      </div>
+      <div class="card-actions">
+        <button class="act-btn expand" tabindex="-1" data-action="expand" title="Open (Enter)">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M1 9L9 1M9 1H5M9 1v4" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="act-btn del" tabindex="-1" data-action="del" title="Delete (d/Del)">
+          <svg width="9" height="9" viewBox="0 0 10 10" fill="none">
+            <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>`;
+
+    card.addEventListener('click', e => {
+      const a = e.target.closest('[data-action]')?.dataset.action;
+      if (a === 'check')       toggle(todo.id);
+      else if (a === 'del')    del(todo.id);
+      else if (a === 'expand') openDetail(todo.id);
+    });
+
+    card.addEventListener('focus', () => { focusedCardId = todo.id; setKbNav(true); });
+    card.addEventListener('blur',  () => setKbNav(false));
+
+    card.addEventListener('keydown', async e => {
+      // 1-9: jump directly to that card number
+      if (/^[1-9]$/.test(e.key)) {
+        e.preventDefault();
+        const target = document.querySelector(`.card[data-num="${e.key}"]`);
+        if (target) target.focus();
+        return;
+      }
+      switch (e.key) {
+        case 'Enter': case 'ArrowRight': case 'e': case 'E':
+          e.preventDefault(); openDetail(todo.id); break;
+        case ' ':
+          e.preventDefault(); await toggle(todo.id); break;
+        case 'Delete':
+          e.preventDefault(); await del(todo.id); break;
+        case 'ArrowDown':
+          e.preventDefault(); navigateCards(todo.id, +1); break;
+        case 'ArrowUp':
+          e.preventDefault(); navigateCards(todo.id, -1); break;
+        case 'Escape':
+          card.blur(); setKbNav(false); focusedCardId = null; break;
+      }
+    });
+
+    card.querySelector('.check').addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault(); e.stopPropagation(); toggle(todo.id);
+      }
+    });
+
+    return card;
+  }
+
+  function navigateCards(currentId, dir) {
+    const all  = [...document.querySelectorAll('.card[tabindex="0"]')];
+    const idx  = all.findIndex(c => c.dataset.id === currentId);
+    const next = all[idx + dir];
+    if (next) next.focus();
+  }
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  async function add() {
+    const raw = inp.value.trim();
+    if (!raw) { collapseInput(); return; }
+
+    const nl    = raw.indexOf('\n');
+    const title = nl === -1 ? raw : (raw.slice(0, nl).trim() || 'Untitled');
+    const notes = nl === -1 ? '' : raw.slice(nl + 1);
+
+    const wasExpanded = inputExpanded; // remember before collapse
+
+    inp.value = '';
+    collapseInput();
+    todos = await window.api.addTodo(title);
+    if (notes) {
+      const newest = todos[0];
+      if (newest) todos = await window.api.updateTodo(newest.id, { notes });
+    }
+    render();
+
+    // Only open detail when the user intentionally expanded the input.
+    // Plain Enter in compact mode just adds quietly to the list.
+    if (wasExpanded) {
+      const newest = todos[0];
+      if (newest) openDetail(newest.id);
+    }
+  }
+
+  // Update only the header counter — no DOM rebuild needed
+  function updateCounter() {
+    const active = todos.filter(t => !t.done).length;
+    document.getElementById('sub-count').textContent =
+      todos.length === 0 ? '' :
+      active       === 0 ? 'All done ✓' :
+                           `${active} remaining`;
+  }
+
+  async function toggle(id) {
+    todos = await window.api.toggleTodo(id);
+    const todo = todos.find(t => t.id === id);
+
+    // Update the card in-place — CSS transitions handle the visual change smoothly
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (card && todo) {
+      card.classList.toggle('done', todo.done);
+      card.setAttribute('aria-label', `Task: ${todo.text}${todo.done ? ', completed' : ''}`);
+      const checkEl = card.querySelector('[data-action="check"]');
+      if (checkEl) checkEl.setAttribute('aria-checked', String(todo.done));
+    }
+
+    updateCounter();
+    if (activeId === id) populateDetail(id);
+  }
+
+  async function del(id) {
+    const all    = [...document.querySelectorAll('.card[tabindex="0"]')];
+    const idx    = all.findIndex(c => c.dataset.id === id);
+    const nextId = all[idx + 1]?.dataset.id || all[idx - 1]?.dataset.id || null;
+
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (card) {
+      card.style.transition = 'transform 0.16s, opacity 0.16s';
+      card.style.transform  = 'translateX(20px)';
+      card.style.opacity    = '0';
+      await new Promise(r => setTimeout(r, 160));
+    }
+    if (activeId === id) closeDetail(false);
+    focusedCardId = nextId;
+    todos = await window.api.deleteTodo(id);
+    render();
+    if (!nextId) setTimeout(() => inp.focus(), 50);
+  }
+
+  // ── Detail ────────────────────────────────────────────────────────────────
+  function openDetail(id) {
+    setKbNav(false);
+    focusedCardId = id;
+    activeId = id;
+    populateDetail(id);
+    const dp = document.getElementById('detail-panel');
+    dp.classList.remove('animating');
+    void dp.offsetWidth;
+    dp.classList.add('animating');
+    document.getElementById('detail-overlay').classList.remove('hidden');
+    dp.scrollTop = 0;
+    setTimeout(() => {
+      const ta = document.getElementById('detail-content');
+      ta.focus();
+      const nl  = ta.value.indexOf('\n');
+      const pos = nl === -1 ? ta.value.length : nl;
+      ta.setSelectionRange(pos, pos);
+    }, 60);
+  }
+
+  function populateDetail(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
+    const content = document.getElementById('detail-content');
+    content.value = todo.text + (todo.notes ? '\n' + todo.notes : '');
+    autoResize(content);
+    content.classList.toggle('done-content', !!todo.done);
+
+    const doneBtn = document.getElementById('detail-done-toggle');
+    doneBtn.classList.toggle('is-done', !!todo.done);
+    document.getElementById('detail-done-label').textContent = todo.done ? 'Undo' : 'Done';
+
+    const created = fullDate(todo.createdAt);
+    const edited  = todo.updatedAt && todo.updatedAt !== todo.createdAt
+      ? ' · edited ' + fullDate(todo.updatedAt) : '';
+    document.getElementById('detail-meta').textContent = created + edited;
+
+    const subs = todo.subtasks || [];
+    document.getElementById('checklist-section')
+      .classList.toggle('has-items', subs.length > 0);
+    renderSubtasks(subs);
+  }
+
+  function splitContent() {
+    const val = document.getElementById('detail-content').value;
+    const nl  = val.indexOf('\n');
+    if (nl === -1) return { text: val.trim() || 'Untitled', notes: '' };
+    return { text: val.slice(0, nl).trim() || 'Untitled', notes: val.slice(nl + 1) };
+  }
+
+  async function saveDetail() {
+    if (!activeId) return;
+    const todo = todos.find(t => t.id === activeId);
+    if (!todo) return;
+    const { text, notes } = splitContent();
+    todos = await window.api.updateTodo(activeId, { text, notes, subtasks: todo.subtasks || [] });
+    render();
+    showToast();
+  }
+
+  function scheduleSave() {
+    clearTimeout(autoSaveT);
+    autoSaveT = setTimeout(saveDetail, 650);
+  }
+
+  function showToast() {
+    const t = document.getElementById('autosave-toast');
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(() => t.classList.remove('show'), 1400);
+  }
+
+  async function closeDetail(save = true) {
+    clearTimeout(autoSaveT);
+    if (save && activeId) await saveDetail();
+    const prevId = activeId;
+    activeId = null;
+    document.getElementById('detail-overlay').classList.add('hidden');
+    if (prevId) {
+      focusedCardId = prevId;
+      requestAnimationFrame(() => {
+        const card = document.querySelector(`[data-id="${prevId}"]`);
+        if (card) card.focus({ preventScroll: false });
+      });
+    }
+  }
+
+  // ── Subtasks ──────────────────────────────────────────────────────────────
+  function renderSubtasks(subs) {
+    const list = document.getElementById('subtask-list');
+    list.innerHTML = '';
+    subs.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = `subtask-row${s.done ? ' s-done' : ''}`;
+      row.setAttribute('tabindex', '0');
+      row.innerHTML = `
+        <div class="s-check" tabindex="0" data-action="check">
+          <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="s-text">${escHtml(s.text)}</span>
+        <button class="s-del" data-action="del" tabindex="0" title="Remove (Del)">
+          <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
+            <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>`;
+      row.addEventListener('click', e => {
+        const a = e.target.closest('[data-action]')?.dataset.action;
+        if (a === 'check') toggleSubtask(i);
+        else if (a === 'del') deleteSubtask(i);
+      });
+      row.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleSubtask(i); }
+        if (e.key === 'Delete') { e.preventDefault(); deleteSubtask(i); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); row.nextElementSibling?.focus?.(); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); row.previousElementSibling?.focus?.(); }
+      });
+      list.appendChild(row);
+    });
+  }
+
+  async function toggleSubtask(idx) {
+    const todo = todos.find(t => t.id === activeId);
+    if (!todo) return;
+    const subs = [...(todo.subtasks || [])];
+    subs[idx] = { ...subs[idx], done: !subs[idx].done };
+    todos = await window.api.updateTodo(activeId, { subtasks: subs });
+    render(); renderSubtasks(subs);
+    document.getElementById('checklist-section')
+      .classList.toggle('has-items', subs.length > 0);
+  }
+
+  async function deleteSubtask(idx) {
+    const todo = todos.find(t => t.id === activeId);
+    if (!todo) return;
+    const subs = (todo.subtasks || []).filter((_, i) => i !== idx);
+    todos = await window.api.updateTodo(activeId, { subtasks: subs });
+    render(); renderSubtasks(subs);
+    document.getElementById('checklist-section')
+      .classList.toggle('has-items', subs.length > 0);
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
+  // ── Detail listeners ──────────────────────────────────────────────────────
+  document.getElementById('btn-close-detail').addEventListener('click', () => closeDetail(true));
+  document.getElementById('detail-done-toggle').addEventListener('click', async () => {
+    if (!activeId) return;
+    todos = await window.api.toggleTodo(activeId);
+    render(); populateDetail(activeId);
+  });
+  document.getElementById('detail-content').addEventListener('input', e => {
+    autoResize(e.target); scheduleSave();
+  });
+  document.getElementById('detail-content').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); closeDetail(true); }
+  });
+  document.getElementById('detail-delete-btn').addEventListener('click', () => {
+    if (activeId) del(activeId);
+  });
+
+  // ── Global shortcuts ──────────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    // Alt+T — toggle theme everywhere
+    if (e.altKey && e.key === 't') { e.preventDefault(); toggleTheme(); return; }
+
+    const tag = document.activeElement?.tagName;
+    const inText = tag === 'INPUT' || tag === 'TEXTAREA';
+    const inCard = !!document.activeElement?.closest('.card[tabindex]');
+
+    // 1-9: jump to card by number (when not typing and not in detail)
+    if (/^[1-9]$/.test(e.key) && !activeId && !inText && !inCard) {
+      e.preventDefault();
+      const target = document.querySelector(`.card[data-num="${e.key}"]`);
+      if (target) target.focus();
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      if (activeId) { closeDetail(true); return; }
+      if (focusedCardId) {
+        document.querySelector(`[data-id="${focusedCardId}"]`)?.blur();
+        focusedCardId = null; setKbNav(false);
+      }
+    }
+  });
+
+  // ── Main listeners ────────────────────────────────────────────────────────
+  document.getElementById('btn-add').addEventListener('click', add);
+
+  inp.addEventListener('input', () => { if (inputExpanded) autoResize(inp); });
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      // Expand to textarea mode if not yet expanded; otherwise allow natural newline
+      if (!inputExpanded) { e.preventDefault(); expandInput(); }
+      return;
+    }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); add(); return;
+    }
+    if (e.key === 'Escape') {
+      if (inputExpanded) { collapseInput(); return; }
+    }
+    if (!inputExpanded && e.key === 'ArrowDown') {
+      const first = document.querySelector('.card[tabindex="0"]');
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  (async () => {
+    todos = await window.api.getTodos();
+    render();
+    setInterval(render, 60000);
+  })();
+</script>
+</body>
+</html>
