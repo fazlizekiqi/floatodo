@@ -179,7 +179,24 @@ Use [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
 
 ---
 
-### Step 6 — Build and publish
+### Step 6 — Tag the commit and push the tag
+
+After bumping the version, commit the change and create a Git tag that matches the version **exactly** (with a `v` prefix):
+
+```bash
+git add package.json
+git commit -m "chore: bump version to 1.1.0"
+git tag v1.1.0
+git push origin main
+git push origin v1.1.0
+```
+
+> The tag **must** match the version in `package.json` (e.g. version `1.1.0` → tag `v1.1.0`).  
+> `electron-builder` and GitHub Releases both use this tag to name the release.
+
+---
+
+### Step 7 — Build and publish
 
 ```bash
 npm run release:win
@@ -193,7 +210,7 @@ This does everything in one command:
 
 ---
 
-### Step 7 — How users receive the update
+### Step 8 — How users receive the update
 
 Once the release is published on GitHub:
 

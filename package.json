@@ -1,17 +1,18 @@
 {
   "name": "floatodo",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Lightweight desktop todo overlay",
   "main": "main.js",
   "scripts": {
-    "start":       "\"C:\\ws\\developer\\floatodo\\electron-v42.5.0-win32-x64\\electron.exe\" .",
-    "build:mac":   "npx electron-builder --mac --dir",
-    "build:win":   "npx electron-builder --win --dir",
+    "start": "\"C:\\ws\\developer\\floatodo\\electron-v42.5.0-win32-x64\\electron.exe\" .",
+    "build:mac": "npx electron-builder --mac --dir",
+    "build:win": "npx electron-builder --win --dir",
     "build:linux": "npx electron-builder --linux --dir",
     "release:win": "npx electron-builder --win --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.9",
+    "qrcode": "^1.5.4"
   },
   "build": {
     "appId": "com.floatodo.app",
@@ -27,7 +28,7 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "YOUR_GITHUB_USERNAME",
+      "owner": "fazlizekiqi",
       "repo": "floatodo",
       "releaseType": "release"
     },
@@ -37,6 +38,7 @@
     },
     "win": {
       "target": "nsis",
+      "icon": "assets/icon.ico",
       "artifactName": "FloaTodo-Setup-${version}.exe"
     },
     "nsis": {

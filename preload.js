@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('api', {
   hideWindow:   ()           => ipcRenderer.invoke('window:hide'),
   onFocusInput: (cb)         => { _focusInputCb = cb; },
 
+  // QR code generation — handled by main process (full Node.js access, no sandbox issues)
+  generateQR: (text, opts) => ipcRenderer.invoke('qr:generate', { text, opts }),
+
   // Auto-updater
   onUpdateAvailable:  (cb) => { _updateAvailableCb  = cb; },
   onUpdateDownloaded: (cb) => { _updateDownloadedCb = cb; },

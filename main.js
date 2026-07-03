@@ -1,6 +1,8 @@
 const { app, BrowserWindow, ipcMain, screen, Tray, Menu, nativeImage, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
+let QRCode = null;
+try { QRCode = require('qrcode'); } catch (e) { console.warn('qrcode unavailable:', e.message); }
 
 // electron-updater — only active in packaged builds
 let autoUpdater;
@@ -207,6 +209,12 @@ ipcMain.handle('todos:reorder', (_, ids) => {
 });
 
 ipcMain.handle('window:hide', () => win.hide());
+
+ipcMain.handle('qr:generate', async (_, { text, opts }) => {
+  if (!QRCode) throw new Error('qrcode not available');
+  const svg = await QRCode.toString(text, { type: 'svg', width: (opts && opts.width) || 192, margin: opts && opts.margin != null ? opts.margin : 2 });
+  return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+});
 
 // ── Auto-updater IPC ──────────────────────────────────────────────────────────
 ipcMain.handle('updater:check',   () => autoUpdater?.checkForUpdates());

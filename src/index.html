@@ -38,6 +38,8 @@
       --panel-shadow: -4px 0 28px rgba(0,0,0,0.50);
       --divider: rgba(255,255,255,0.045);
       --r:  14px; --rs: 10px; --rx: 7px;
+      --panel-radius: 0px;
+      --panel-backdrop: none;
     }
 
     /* ── LIGHT THEME ──────────────────────────────────── */
@@ -59,6 +61,179 @@
       --panel-border: rgba(0,0,0,0.10);
       --panel-shadow: -4px 0 28px rgba(0,0,0,0.18);
       --divider: rgba(0,0,0,0.08);
+      --panel-radius: 0px;
+      --panel-backdrop: none;
+    }
+
+    /* ── CLAYMORPHISM THEME ────────────────────────────── */
+    [data-theme="clay"] {
+      --base: #ffffff;
+      --surf: #f0eeff;
+      --nr:   4px 4px 10px rgba(145,192,255,0.45), -3px -3px 8px rgba(255,255,255,0.98);
+      --nr-s: 3px 3px 7px rgba(145,192,255,0.35),  -2px -2px 6px rgba(255,255,255,0.95);
+      --ni:   inset 4px 4px 9px rgba(145,192,255,0.28), inset -3px -3px 7px rgba(255,255,255,0.98);
+      --ni-s: inset 3px 3px 6px rgba(145,192,255,0.22), inset -2px -2px 5px rgba(255,255,255,0.95);
+      --foc:  0 0 0 2px rgba(99,102,241,0.52);
+      --t:    rgba(18,18,40,0.88);
+      --td:   rgba(18,18,40,0.52);
+      --tdd:  rgba(18,18,40,0.34);
+      --tdone:rgba(18,18,40,0.50);
+      --ac:   #6366f1;
+      --ac-glow:   rgba(99,102,241,0.32);
+      --ac-glow-h: rgba(99,102,241,0.48);
+      --panel-border: rgba(145,192,255,0.35);
+      --panel-shadow: 35px 35px 68px 0px rgba(145,192,255,0.5),
+                      inset -8px -8px 16px 0px rgba(145,192,255,0.6),
+                      inset 0px 11px 28px 0px rgb(255,255,255);
+      --divider: rgba(145,192,255,0.22);
+      --r:  18px; --rs: 12px; --rx: 8px;
+      --panel-radius: 26px;
+      --panel-backdrop: blur(5px);
+    }
+
+    /* ── LIQUID THEME ──────────────────────────────────── */
+    [data-theme="liquid"] {
+      --base: rgba(255,255,255,0.12);
+      --surf: rgba(255,255,255,0.14);
+      --nr:   0 4px 20px rgba(0,0,0,0.22),
+              inset 0 1px 0 rgba(255,255,255,0.55),
+              inset 0 0 0 1px rgba(255,255,255,0.12);
+      --nr-s: 0 2px 10px rgba(0,0,0,0.18),
+              inset 0 1px 0 rgba(255,255,255,0.48),
+              inset 0 0 0 1px rgba(255,255,255,0.10);
+      --ni:   inset 0 2px 8px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.06);
+      --ni-s: inset 0 1px 5px rgba(0,0,0,0.22), inset 0 0 0 1px rgba(255,255,255,0.05);
+      --foc:  0 0 0 2px rgba(165,200,255,0.65), 0 0 12px rgba(165,200,255,0.25);
+      --t:    rgba(255,255,255,0.95);
+      --td:   rgba(255,255,255,0.72);
+      --tdd:  rgba(255,255,255,0.50);
+      --tdone:rgba(255,255,255,0.48);
+      --ac:   #a5c8ff;
+      --ac-glow:   rgba(165,200,255,0.38);
+      --ac-glow-h: rgba(165,200,255,0.55);
+      --panel-border: rgba(255,255,255,0.20);
+      --panel-shadow: inset 0 0 0 1px rgba(255,255,255,0.15),
+                      inset 1.5px 1.5px 0 rgba(255,255,255,0.50),
+                      inset 0 0 12px rgba(255,255,255,0.18),
+                      0 8px 32px rgba(0,0,0,0.20);
+      --divider: rgba(255,255,255,0.14);
+      --r: 14px; --rs: 10px; --rx: 7px;
+      --panel-radius: 40px;
+      --panel-backdrop: blur(12px) saturate(1.8) brightness(1.15) contrast(1.05);
+    }
+
+    /* Clay & Liquid: floating panel with rounded corners + backdrop blur */
+    [data-theme="clay"] #panel,
+    [data-theme="liquid"] #panel {
+      inset: 6px;
+      border-radius: var(--panel-radius);
+      border: 1px solid var(--panel-border);
+    }
+    [data-theme="clay"] #panel {
+      backdrop-filter: var(--panel-backdrop);
+      -webkit-backdrop-filter: var(--panel-backdrop);
+    }
+    [data-theme="liquid"] #panel {
+      backdrop-filter: blur(1px) url(#lg-filter) blur(2px) saturate(1.8) brightness(1.12);
+      -webkit-backdrop-filter: var(--panel-backdrop);
+    }
+
+    /* Neutral dark tint — readable on any desktop background */
+    [data-theme="liquid"] #panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--panel-radius);
+      background: rgba(14, 14, 16, 0.55);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Diagonal glass gloss */
+    [data-theme="liquid"] #panel::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--panel-radius);
+      background:
+        radial-gradient(ellipse 65% 28% at 25% 10%,
+          rgba(255,255,255,0.22) 0%, transparent 70%),
+        linear-gradient(148deg,
+          rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 18%,
+          transparent 44%, rgba(0,0,0,0.04) 70%, rgba(0,0,0,0.14) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ── LIQUID: element surfaces ── */
+    [data-theme="liquid"] .card {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(12px) saturate(1.6) brightness(1.08);
+      -webkit-backdrop-filter: blur(12px) saturate(1.6) brightness(1.08);
+      overflow: hidden;
+    }
+    [data-theme="liquid"] .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 50%;
+      background: linear-gradient(176deg,
+        rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 45%, transparent 100%);
+      pointer-events: none; z-index: 0;
+      border-radius: inherit;
+    }
+    [data-theme="liquid"] .input-wrap textarea,
+    [data-theme="liquid"] .detail-content {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(10px) saturate(1.5);
+      -webkit-backdrop-filter: blur(10px) saturate(1.5);
+    }
+    [data-theme="liquid"] .subtask-row {
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(8px) saturate(1.5);
+      -webkit-backdrop-filter: blur(8px) saturate(1.5);
+    }
+    [data-theme="liquid"] .btn-icon,
+    [data-theme="liquid"] .act-btn,
+    [data-theme="liquid"] .btn-close-detail,
+    [data-theme="liquid"] .detail-done-toggle,
+    [data-theme="liquid"] .btn-delete-task,
+    [data-theme="liquid"] .update-banner {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px) saturate(1.6);
+      -webkit-backdrop-filter: blur(10px) saturate(1.6);
+    }
+    [data-theme="liquid"] .btn-add {
+      backdrop-filter: blur(8px) saturate(1.5);
+      -webkit-backdrop-filter: blur(8px) saturate(1.5);
+    }
+
+    /* ── LIQUID: detail overlay — same glass as panel ── */
+    [data-theme="liquid"] #detail-overlay {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-left: 1px solid rgba(255,255,255,0.20);
+      backdrop-filter: blur(1px) url(#lg-filter) blur(2px) saturate(1.8) brightness(1.12);
+      -webkit-backdrop-filter: var(--panel-backdrop);
+      box-shadow: var(--panel-shadow);
+      inset: 6px;
+      border-radius: var(--panel-radius);
+    }
+    [data-theme="liquid"] #detail-overlay::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--panel-radius);
+      background: rgba(14, 14, 16, 0.80);
+      pointer-events: none; z-index: 0;
+    }
+    [data-theme="liquid"] #detail-overlay::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: var(--panel-radius);
+      background:
+        radial-gradient(ellipse 65% 28% at 25% 10%,
+          rgba(255,255,255,0.22) 0%, transparent 70%),
+        linear-gradient(148deg,
+          rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.08) 18%,
+          transparent 44%, rgba(0,0,0,0.04) 70%, rgba(0,0,0,0.14) 100%);
+      pointer-events: none; z-index: 2;
     }
 
     html, body {
@@ -76,11 +251,13 @@
       background: var(--base);
       border-left: 1px solid var(--panel-border);
       box-shadow: var(--panel-shadow);
-      transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
+      transition: background 0.25s, box-shadow 0.25s, border-color 0.25s,
+                  border-radius 0.3s, inset 0.3s, backdrop-filter 0.3s;
     }
 
+
     #app {
-      position: relative; z-index: 1;
+      position: relative; z-index: 3;
       width: 100%; height: 100vh;
       overflow-y: auto; overflow-x: hidden;
       padding: 18px 14px 80px;
@@ -218,6 +395,16 @@
         0 0 0 2px rgba(37,99,235,0.55),
         0 0 18px rgba(37,99,235,0.16);
     }
+    [data-theme="clay"] .card:focus-visible {
+      box-shadow: var(--nr),
+        0 0 0 2px rgba(99,102,241,0.55),
+        0 0 18px rgba(99,102,241,0.20);
+    }
+    [data-theme="liquid"] .card:focus-visible {
+      box-shadow: var(--nr),
+        0 0 0 2px rgba(255,255,255,0.60),
+        0 0 18px rgba(255,255,255,0.18);
+    }
     .card:focus-visible .card-actions { opacity: 1; }
     .card.done { box-shadow: var(--ni); opacity: 0.48; }
     .card.done .todo-text { color: var(--tdone); }
@@ -346,7 +533,7 @@
     }
     #detail-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     #detail-panel {
-      position: absolute; inset: 0;
+      position: absolute; inset: 0; z-index: 3;
       overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
       padding: 16px 15px 44px;
       display: flex; flex-direction: column;
@@ -478,6 +665,97 @@
       from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
+    /* ── QR SHARE MODAL ──────────────────────────────── */
+    #qr-modal {
+      position: fixed; inset: 0; z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.52);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 1; visibility: visible;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+    #qr-modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .qr-card {
+      background: var(--surf);
+      border-radius: var(--r);
+      box-shadow: var(--nr);
+      border: 1px solid var(--panel-border);
+      padding: 18px 20px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      max-width: 232px; width: 100%;
+      animation: fade-in 0.2s ease both;
+    }
+    [data-theme="liquid"] .qr-card {
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(16px) saturate(1.8) brightness(1.1);
+      -webkit-backdrop-filter: blur(16px) saturate(1.8) brightness(1.1);
+    }
+
+    .qr-card-header {
+      display: flex; width: 100%;
+      align-items: center; justify-content: space-between;
+    }
+    .qr-title {
+      font-size: 11px; font-weight: 600;
+      color: var(--t); letter-spacing: 0.2px;
+    }
+    .btn-close-qr {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--surf); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--td); font-size: 14px; line-height: 1;
+      box-shadow: var(--nr-s);
+      transition: box-shadow 0.15s, color 0.15s;
+    }
+    .btn-close-qr:hover { color: var(--t); }
+    .btn-close-qr:active { box-shadow: var(--ni-s); }
+
+    .qr-date {
+      font-size: 9.5px; color: var(--ac);
+      font-weight: 500; letter-spacing: 0.2px; width: 100%;
+    }
+
+    /* QR canvas always on white so it scans reliably */
+    .qr-canvas-wrap {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    }
+    .qr-canvas-wrap canvas, .qr-canvas-wrap img { display: block; }
+
+    .qr-empty {
+      font-size: 10px; color: var(--tdd); text-align: center;
+      padding: 16px 0; line-height: 1.7;
+    }
+
+    .qr-list-preview {
+      width: 100%;
+      font-size: 9px; color: var(--td);
+      line-height: 1.55; max-height: 72px;
+      overflow: hidden; position: relative;
+    }
+    .qr-list-preview::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 20px;
+      background: linear-gradient(transparent, var(--surf));
+    }
+    [data-theme="liquid"] .qr-list-preview::after {
+      background: linear-gradient(transparent, rgba(255,255,255,0.10));
+    }
+
+    .qr-count {
+      font-size: 9px; color: var(--tdd);
+      text-align: center; width: 100%;
+    }
+    .qr-hint {
+      font-size: 8.5px; color: var(--tdd);
+      text-align: center; line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -491,8 +769,8 @@
       <div class="header-count" id="sub-count">—</div>
     </div>
     <div class="header-btns">
-      <!-- Theme toggle: shows sun in dark mode, moon in light mode -->
-      <button class="btn-icon" id="btn-theme" title="Toggle theme (Alt+T)">
+      <!-- Theme toggle: cycles dark → light → clay → liquid -->
+      <button class="btn-icon" id="btn-theme" title="Cycle theme (Alt+T)">
         <svg id="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
           <circle cx="12" cy="12" r="4.5"/>
@@ -509,6 +787,32 @@
              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
              style="display:none">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <!-- Clay: rounded gem shape -->
+        <svg id="icon-clay" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"
+             style="display:none">
+          <rect x="3" y="3" width="18" height="18" rx="7" ry="7"/>
+        </svg>
+        <!-- Liquid: water drop shape -->
+        <svg id="icon-liquid" width="12" height="14" viewBox="0 0 24 28" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+             style="display:none">
+          <path d="M12 2 C12 2 3 12 3 18 a9 9 0 0 0 18 0 C21 12 12 2 12 2z"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="btn-qr" title="Share today's list (Alt+Q)">
+        <!-- QR code icon -->
+        <svg width="13" height="13" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="1" width="6" height="6" rx="1"/>
+          <rect x="11" y="1" width="6" height="6" rx="1"/>
+          <rect x="1" y="11" width="6" height="6" rx="1"/>
+          <rect x="3" y="3" width="2" height="2" fill="currentColor" stroke="none"/>
+          <rect x="13" y="3" width="2" height="2" fill="currentColor" stroke="none"/>
+          <rect x="3" y="13" width="2" height="2" fill="currentColor" stroke="none"/>
+          <line x1="11" y1="11" x2="11" y2="11"/><line x1="14" y1="11" x2="14" y2="11"/>
+          <line x1="17" y1="11" x2="17" y2="11"/><line x1="11" y1="14" x2="11" y2="14"/>
+          <line x1="14" y1="14" x2="17" y2="14"/><line x1="17" y1="17" x2="17" y2="17"/>
+          <line x1="11" y1="17" x2="14" y2="17"/>
         </svg>
       </button>
       <button class="btn-icon" title="Hide (Ctrl+Shift+Space)" onclick="window.api.hideWindow()">×</button>
@@ -534,7 +838,7 @@
   <div class="input-expand-hint" id="input-expand-hint">
     ⏎ save &nbsp;·&nbsp; Shift+⏎ new line &nbsp;·&nbsp; Esc collapse
   </div>
-  <div class="shortcut-hint"><kbd>Enter</kbd> add · <kbd>Shift+Enter</kbd> expand · <kbd>↑↓</kbd> navigate · <kbd>Alt+T</kbd> theme</div>
+  <div class="shortcut-hint"><kbd>Enter</kbd> add · <kbd>Shift+Enter</kbd> expand · <kbd>↑↓</kbd> navigate · <kbd>Alt+T</kbd> theme · <kbd>Alt+Q</kbd> share</div>
 
   <div id="task-groups"></div>
 
@@ -577,6 +881,42 @@
 
 <div class="autosave-toast" id="autosave-toast">Saved</div>
 
+<!-- QR Share Modal -->
+<div id="qr-modal" class="hidden">
+  <div class="qr-card">
+    <div class="qr-card-header">
+      <span class="qr-title">📋 Today's List</span>
+      <button class="btn-close-qr" id="btn-close-qr" title="Close (Esc)">×</button>
+    </div>
+    <div class="qr-date" id="qr-date"></div>
+    <div class="qr-canvas-wrap" id="qr-canvas-wrap">
+      <img id="qr-img" width="192" height="192" alt="QR code" style="border-radius:4px">
+    </div>
+    <div class="qr-empty hidden" id="qr-empty">
+      Nothing yet today.<br>Add a task first!
+    </div>
+    <div class="qr-list-preview" id="qr-list-preview"></div>
+    <div class="qr-count" id="qr-count"></div>
+    <div class="qr-hint">Scan with your phone camera to view today's tasks</div>
+  </div>
+</div>
+
+<!-- SVG filter used by the Liquid theme's backdrop-filter chain -->
+<!-- Sized for 420×280px (the app window). The displacement map creates the liquid chromatic-aberration warp. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="lg-filter" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feImage x="0" y="0" width="420" height="280" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22420%22%20height%3D%22280%22%20viewBox%3D%220%200%20420%20280%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22Y%22%20x1%3D%220%22%20x2%3D%220%22%20y1%3D%222%25%22%20y2%3D%2298%25%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230F0%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%22X%22%20x1%3D%221%25%22%20x2%3D%2299%25%22%20y1%3D%220%22%20y2%3D%220%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23F00%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23000%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23808080%22%2F%3E%3Cg%20filter%3D%22blur(2px)%22%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22%23000080%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23Y)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20width%3D%22420%22%20height%3D%22280%22%20fill%3D%22url(%23X)%22%20style%3D%22mix-blend-mode%3Ascreen%22%2F%3E%3Crect%20x%3D%2214%22%20y%3D%2214%22%20width%3D%22392%22%20height%3D%22252%22%20rx%3D%2214%22%20ry%3D%2214%22%20fill%3D%22%23808080%22%20filter%3D%22blur(14px)%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" result="displacementMap" />
+    <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="220" xChannelSelector="R" yChannelSelector="G" />
+    <feColorMatrix type="matrix" result="displacedR" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+    <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="216" xChannelSelector="R" yChannelSelector="G" />
+    <feColorMatrix type="matrix" result="displacedG" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" />
+    <feDisplacementMap in="SourceGraphic" in2="displacementMap" scale="212" xChannelSelector="R" yChannelSelector="G" />
+    <feColorMatrix type="matrix" result="displacedB" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" />
+    <feBlend in="displacedR" in2="displacedG" mode="screen" result="rg" />
+    <feBlend in="rg" in2="displacedB" mode="screen" />
+  </filter>
+</svg>
+
 <script>
   let todos         = [];
   let activeId      = null;
@@ -612,19 +952,30 @@
   });
 
   // ── Theme ─────────────────────────────────────────────────────────────────
+  const THEMES = ['dark', 'light', 'clay', 'liquid'];
   let currentTheme = localStorage.getItem('floatodo-theme') || 'dark';
 
   function applyTheme(theme) {
     currentTheme = theme;
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('floatodo-theme', theme);
-    document.getElementById('icon-sun').style.display  = theme === 'dark'  ? '' : 'none';
-    document.getElementById('icon-moon').style.display = theme === 'light' ? '' : 'none';
-    document.getElementById('btn-theme').title = theme === 'dark'
-      ? 'Switch to light (Alt+T)' : 'Switch to dark (Alt+T)';
+
+    // Show the icon that represents the NEXT theme in cycle
+    const nextTheme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    document.getElementById('icon-sun').style.display    = nextTheme === 'light'  ? '' : 'none';
+    document.getElementById('icon-moon').style.display   = nextTheme === 'dark'   ? '' : 'none';
+    document.getElementById('icon-clay').style.display   = nextTheme === 'clay'   ? '' : 'none';
+    document.getElementById('icon-liquid').style.display = nextTheme === 'liquid' ? '' : 'none';
+
+    const labels = { dark: 'Dark', light: 'Light', clay: 'Claymorphism', liquid: 'Liquid' };
+    document.getElementById('btn-theme').title =
+      `${labels[theme]} — click for ${labels[nextTheme]} (Alt+T)`;
   }
 
-  function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+  function toggleTheme() {
+    const idx  = THEMES.indexOf(currentTheme);
+    applyTheme(THEMES[(idx + 1) % THEMES.length]);
+  }
 
   // Apply on load (also handled by inline script in <head>, this syncs the icons)
   applyTheme(currentTheme);
@@ -1162,6 +1513,130 @@
     render();
     setInterval(render, 60000);
   })();
+</script>
+
+<!-- QR code generation is handled via preload.js (Node.js qrcode module — no CDN needed) -->
+<script>
+  // ── QR Share ──────────────────────────────────────────────────────────────
+  const qrModal        = document.getElementById('qr-modal');
+  const qrImg          = document.getElementById('qr-img');
+  const qrCanvasWrap   = document.getElementById('qr-canvas-wrap');
+  const qrEmpty        = document.getElementById('qr-empty');
+  const qrListPreview  = document.getElementById('qr-list-preview');
+  const qrCountEl      = document.getElementById('qr-count');
+  const qrDateEl       = document.getElementById('qr-date');
+
+  function getTodaysTodos() {
+    const today = new Date().toDateString();
+    return todos.filter(t => new Date(t.createdAt).toDateString() === today);
+  }
+
+  function buildQRText(list) {
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+    });
+    if (list.length === 0) return `FloaTodo — ${dateStr}\n\nNo tasks today!`;
+
+    const active = list.filter(t => !t.done);
+    const done   = list.filter(t => t.done);
+    let text = `FloaTodo — ${dateStr}\n`;
+
+    if (active.length) {
+      text += '\n' + active.map(t => `\u25A1 ${t.text}`).join('\n');
+    }
+    if (done.length) {
+      if (active.length) text += '\n';
+      text += '\n' + done.map(t => `\u2713 ${t.text}`).join('\n');
+    }
+    return text;
+  }
+
+  function buildListPreviewHTML(list) {
+    const active = list.filter(t => !t.done);
+    const done   = list.filter(t => t.done);
+    const rows = [
+      ...active.map(t => `<span style="opacity:0.9">□ ${escHtml(t.text)}</span>`),
+      ...done.map(t => `<span style="opacity:0.45;text-decoration:line-through">✓ ${escHtml(t.text)}</span>`)
+    ];
+    return rows.join('<br>');
+  }
+
+  async function showQRModal() {
+    const today = new Date().toDateString();
+    const rawList = todos.filter(t => new Date(t.createdAt).toDateString() === today);
+    const list = rawList.length > 0 ? rawList : todos.slice(0, 15);
+    const isToday = rawList.length > 0;
+
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric'
+    });
+    qrDateEl.textContent = isToday ? dateStr : 'Recent tasks';
+
+    const active = list.filter(t => !t.done).length;
+    const done   = list.filter(t => t.done).length;
+
+    if (list.length === 0) {
+      qrCanvasWrap.style.display = 'none';
+      qrEmpty.classList.remove('hidden');
+      qrListPreview.innerHTML = '';
+      qrCountEl.textContent = '';
+    } else {
+      qrCanvasWrap.style.display = '';
+      qrEmpty.classList.add('hidden');
+
+      const qrOpts = { width: 192, margin: 2 };
+      let dataUrl;
+      try {
+        dataUrl = await window.api.generateQR(buildQRText(list), qrOpts);
+      } catch (err) {
+        // QR data too large — fall back to active tasks only
+        try {
+          dataUrl = await window.api.generateQR(buildQRText(list.filter(t => !t.done)), qrOpts);
+        } catch (err2) {
+          dataUrl = null;
+        }
+      }
+
+      if (dataUrl) {
+        qrImg.src = dataUrl;
+        qrImg.style.display = '';
+      } else {
+        qrImg.style.display = 'none';
+        qrCanvasWrap.style.display = 'none';
+        qrEmpty.textContent = 'Could not generate QR code.';
+        qrEmpty.classList.remove('hidden');
+      }
+
+      qrListPreview.innerHTML = buildListPreviewHTML(list);
+      const parts = [];
+      if (active) parts.push(`${active} active`);
+      if (done)   parts.push(`${done} done`);
+      qrCountEl.textContent = parts.join(' · ');
+    }
+
+    qrModal.classList.remove('hidden');
+  }
+
+  function closeQRModal() {
+    qrModal.classList.add('hidden');
+  }
+
+  document.getElementById('btn-qr').addEventListener('click', showQRModal);
+  document.getElementById('btn-close-qr').addEventListener('click', closeQRModal);
+  qrModal.addEventListener('click', e => { if (e.target === qrModal) closeQRModal(); });
+
+  // Alt+Q global shortcut
+  document.addEventListener('keydown', e => {
+    if (e.altKey && (e.key === 'q' || e.key === 'Q')) {
+      e.preventDefault();
+      if (qrModal.classList.contains('hidden')) showQRModal();
+      else closeQRModal();
+    }
+    // Also close QR modal on Escape
+    if (e.key === 'Escape' && !qrModal.classList.contains('hidden')) {
+      closeQRModal();
+    }
+  }, true); // capture phase so it fires before the existing Escape handler
 </script>
 </body>
 </html>
