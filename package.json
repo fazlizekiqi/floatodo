@@ -1,6 +1,6 @@
 {
   "name": "floatodo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Lightweight desktop todo overlay",
   "main": "main.js",
   "scripts": {
