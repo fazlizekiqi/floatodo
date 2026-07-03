@@ -5,7 +5,7 @@ A lightweight always-on-top desktop todo overlay with a dark neumorphic UI built
 ## Features
 
 - **Always on top** — floats on the right edge of your screen, above every window
-- **Dark + light neumorphism** — tactile raised/inset shadow design; toggle with `Alt+T`
+- **Dark + light neumorphism** — tactile raised/inset shadow design; cycle 5 themes with `Alt+T` (Dark · Light · Clay · Liquid · Ember)
 - **Local JSON storage** — todos saved automatically, no account or cloud required
 - **Day-based grouping** — tasks grouped under Today / Yesterday / day names
 - **Task detail view** — open any task to edit title, freeform notes, and a checklist

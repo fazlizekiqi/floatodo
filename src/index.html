@@ -122,6 +122,30 @@
       --panel-backdrop: blur(12px) saturate(1.8) brightness(1.15) contrast(1.05);
     }
 
+    /* ── EMBER THEME ──────────────────────────────────── */
+    [data-theme="ember"] {
+      --base: #1e1410;
+      --surf: #231710;
+      --nr:   6px 6px 14px rgba(0,0,0,0.55), -4px -4px 10px rgba(255,140,60,0.08);
+      --nr-s: 4px 4px 9px rgba(0,0,0,0.50),  -3px -3px 7px rgba(255,140,60,0.06);
+      --ni:   inset 5px 5px 11px rgba(0,0,0,0.60), inset -3px -3px 7px rgba(255,140,60,0.07);
+      --ni-s: inset 3px 3px 7px rgba(0,0,0,0.52), inset -2px -2px 5px rgba(255,140,60,0.05);
+      --foc:  0 0 0 2px rgba(251,146,60,0.65);
+      --t:    rgba(255,237,213,0.92);
+      --td:   rgba(255,200,140,0.55);
+      --tdd:  rgba(255,180,100,0.32);
+      --tdone:rgba(255,180,100,0.38);
+      --ac:   #fb923c;
+      --ac-glow:   rgba(251,146,60,0.40);
+      --ac-glow-h: rgba(251,146,60,0.58);
+      --panel-border: rgba(255,140,60,0.10);
+      --panel-shadow: -4px 0 28px rgba(0,0,0,0.60);
+      --divider: rgba(255,140,60,0.08);
+      --r:  14px; --rs: 10px; --rx: 7px;
+      --panel-radius: 0px;
+      --panel-backdrop: none;
+    }
+
     /* Clay & Liquid: floating panel with rounded corners + backdrop blur */
     [data-theme="clay"] #panel,
     [data-theme="liquid"] #panel {
@@ -799,6 +823,12 @@
              style="display:none">
           <path d="M12 2 C12 2 3 12 3 18 a9 9 0 0 0 18 0 C21 12 12 2 12 2z"/>
         </svg>
+        <!-- Ember: flame shape -->
+        <svg id="icon-ember" width="11" height="14" viewBox="0 0 22 28" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+             style="display:none">
+          <path d="M11 2 C11 2 18 10 18 16 a7 7 0 0 1-14 0 C4 12 8 8 8 8 C8 12 11 14 11 14 C11 14 14 10 11 2z"/>
+        </svg>
       </button>
       <button class="btn-icon" id="btn-qr" title="Share today's list (Alt+Q)">
         <!-- QR code icon -->
@@ -952,7 +982,7 @@
   });
 
   // ── Theme ─────────────────────────────────────────────────────────────────
-  const THEMES = ['dark', 'light', 'clay', 'liquid'];
+  const THEMES = ['dark', 'light', 'clay', 'liquid', 'ember'];
   let currentTheme = localStorage.getItem('floatodo-theme') || 'dark';
 
   function applyTheme(theme) {
@@ -966,8 +996,9 @@
     document.getElementById('icon-moon').style.display   = nextTheme === 'dark'   ? '' : 'none';
     document.getElementById('icon-clay').style.display   = nextTheme === 'clay'   ? '' : 'none';
     document.getElementById('icon-liquid').style.display = nextTheme === 'liquid' ? '' : 'none';
+    document.getElementById('icon-ember').style.display  = nextTheme === 'ember'  ? '' : 'none';
 
-    const labels = { dark: 'Dark', light: 'Light', clay: 'Claymorphism', liquid: 'Liquid' };
+    const labels = { dark: 'Dark', light: 'Light', clay: 'Claymorphism', liquid: 'Liquid', ember: 'Ember' };
     document.getElementById('btn-theme').title =
       `${labels[theme]} — click for ${labels[nextTheme]} (Alt+T)`;
   }
